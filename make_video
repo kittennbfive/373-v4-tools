@@ -1,4 +1,4 @@
 #! /bin/sh
 echo Did you insert the real key into aes_decrypt.c?
 
-gcc -Wall -Wextra -lcrypto -o video aes_decrypt.c video.c && echo compiled successfully.
+gcc -Wall -Wextra -o video aes_decrypt.c video.c -lcrypto && echo compiled successfully.
