@@ -124,7 +124,7 @@ int main(void)
 			printf("video 00 l=%u c=%u, processing...\n", length, counter);
 			
 			memcpy(output_data+sz_output_data, packet_data+12, length-4);
-			sz_output_data+=length;
+			sz_output_data+=length-4;
 		}
 		else if(!memcmp(magic, magic_audio, 4))
 		{
