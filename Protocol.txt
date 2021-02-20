@@ -1,0 +1,53 @@
+This file contains information about what i know so far about the network protocol / format used by the 373A V4(!!).
+
+These informations have been obtained by starring at hexdumps for hours, making guesses and try&error. There are probably errors! Use at your own risk!
+
+All multibyte numbers are in BIG ENDIAN!
+
+The device (TX) sends out data using UDP to 239.255.42.42 ports 6000 and 7777.
+
+There is really little data sent to port 6000, i did not look at it at all.
+
+
+The data sent to port 7777 has the following structure:
+4 bytes magic_number, see below
+4 bytes $size == sizeof(UDP-payload)-8
+4 bytes some kind of counter (?) -> to investigate
+actual payload of size $size-4 == sizeof(UDP-payload)-12
+no checksum as far as i know (??)
+
+
+Using dumps kindly provided by other people (Thank you!) i found 4 magic_numbers:
+74 47 74 00 ->video data, not encrypted
+74 47 74 80 ->video data, (partially) encrypted
+74 47 74 81 ->audio data, encrypted
+74 47 74 82 ->unknown, assuming some status-stuff. Lots of 0xFF. To investigate.
+
+
+Audio-data is sent in chunks of 576 bytes (so total size of UDP-payload is 576+12 == 588 bytes). The data is encrypted using AES-128-ECB. I will not publish the key here, but it has been published on IRC and can be readout from the device using telnet or out of a dump of the FLASH inside the device (grep for "key" on the raw image). It is currently unknown if this key is the same on all devices or not. Notice that the size of each chunk is a multiple of 16 bytes (128 bits), this is mandatory for this AES-mode.
+
+For testing openssl is really useful for decrypting raw binary data:
+openssl aes-128-ecb -d -K $key_in_hex -nopad -nosalt -in input.bin > output.bin
+
+The actual format of the audio is "MPEG-1 Audio Layer 2" or short mp2 (not mp3!). It can be played for example with VLC.
+
+
+Things are more difficult and confidence is much lower for the video-data. The format used is "raw" H.264 which is a well-known codec. The MPEG-standard is expensive but the ITU-standard can be downloaded for free, but you *really* don't want to look at it!! (It's over 800 pages and horribly complex.)
+
+The "raw" i mean that the data is sent as a H.264-bitstream without any container like mp4. Search for "NAL unit" (network abstraction layer) if you want to know more. This link gives some information: https://gentlelogic.blogspot.com/2011/11/exploring-h264-part-2-h264-bitstream.html (or ask your favourite search engine)
+
+ffmpeg says it's "h264 (Constrained Baseline), yuvj420p(pc, progressive)". The bitstream can be played with ffplay -i $file or "encapsulated" in mp4 using ffmpeg. VLC will not play it directly! (There might be a way to make it work but for testing just use ffmpeg/ffplay.)
+
+As the video is encoded the UDP packets have a variable length and are partially encrypted. This is what i discovered, consider with caution:
+
+Packets with magic_number 74 47 74 00 contain unencrypted video-data that should be written directly into the output file.
+
+Packets with magic_number 74 47 74 80 contain encrypted data, but AT MOST 1024 bytes are encrypted, all following bytes are "plaintext" and should be copied directly. For packets smaller than 1024 bytes the first n bytes are encrypted where n is the biggest number possible that is smaller than the size of the data AND is a multiple of 16 (remember, AES-128-ECB can only work on multiples of 16 bytes!).
+
+There is still a mystery why some of the video data is sent using magic_number *00 but most of it is sent using magic_number *80. If i remember correctly the "*00"-packets are really small, so it's probably some performance-related thing.
+
+
+That's all for now, folks. Happy hacking.
+
+
+(c) 2021 kitten_nb_five - APGLv3+ - NO WARRANTY!
