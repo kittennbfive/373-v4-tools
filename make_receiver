@@ -1,0 +1,4 @@
+#! /bin/sh
+echo Did you insert the real key into aes_decrypt.c?
+
+gcc -Wall -Wextra  -o receiver aes_decrypt.c receiver.c -lcrypto && echo compiled successfully.
