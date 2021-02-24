@@ -30,7 +30,7 @@ Please notice: This code should be considered a hack and is unfinished. I spent 
 -The PAT and PMT are hardcoded for know. Beware there is a CRC for both, so don't change any single bit!
 -The audio and video might not be in sync. To fix this you will need to read about the PCR and PTS-stuff. 
 -If there is no other network traffic recv() will wait forever and the program not terminate on Ctrl+C. A possible solution might be some sort of timeout of recv(), but i am not familiar with this / i have no idea if this is even possible. (On a real network this shouldn't be a problem as there will always be something like ARP or other stuff, but with a virtual network card - see below - this is annoying.)
--With some captures from other people (Thank you!) (see below) there are no decoder-errors, with others there are A LOT and you can see it on the output. It might be that some V4 do encrypt more data than others or something else, i don't want to dig into this. H.264 as you would need to decode everything from the start to figure out the meaning of a particular bit.
+-With some captures from other people (Thank you!) (see below) there are no decoder-errors, with others there are A LOT and you can see it on the output. It might be that some V4 do encrypt more data than others or something else, i don't want to dig into this. H.264 is nasty as you would need to decode everything from the start to figure out the meaning of a particular bit.
 
 If you really want to dig inside TS search for ITU-T recommendation H.222.0. The pdf is available for free, but its over a hundred pages long. They also have a standard/recommendation for H.264 but it's 800 pages and absolutely horrible...
 
