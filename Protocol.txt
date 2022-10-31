@@ -50,4 +50,4 @@ There is still a mystery why some of the video data is sent using magic_number *
 That's all for now, folks. Happy hacking.
 
 
-(c) 2021 kitten_nb_five - APGLv3+ - NO WARRANTY!
+(c) 2021 kittennbfive - AGPLv3+ - NO WARRANTY!
